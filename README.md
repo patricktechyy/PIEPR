@@ -1,6 +1,6 @@
 # PIEPR
 
-PIEPR (PIEPR - PLR + Infrared + Extraction, Processing & Reporting) is a lightweight pipeline to extract a **raw pupil diameter time-series** from a recorded video of the Pupil, then applying a set of preprocessing steps (confidence threshold filtering, biologically-feasible checks, blink detection, outlier removal using MAD, linear interpolation, and Savitzky–Golay smoothing) in order to produce a clean **pupillary light reflex (PLR)** graph.
+PIEPR (PIEPR = PLR + Infrared + Extraction, Processing & Reporting) is a lightweight pipeline to extract a **raw pupil diameter time-series** from a recorded video of the Pupil, then applying a set of preprocessing steps (confidence threshold filtering, biologically-feasible checks, blink detection, outlier removal using MAD, linear interpolation, and Savitzky–Golay smoothing) in order to produce a clean **pupillary light reflex (PLR)** graph.
 
 This repository will only focus on **offline processing**:
 - Input: recorded eye videos (e.g., `.mp4`)
