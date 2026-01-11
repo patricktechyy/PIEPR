@@ -98,3 +98,10 @@ This project uses **PyPupilEXT** (`pypupilext`) for pupil ellipse fitting (PuReS
 Many thanks to Zandi et al. for developing PupilEXT (and creating a Python port of it) and Santini et al. for his development of the PuReST algorithm.
 
 Installation instructions are also included in **docs/INSTALL.md**.
+
+---
+
+Thank you for checking out our repo 
+Developed by haruka, patrickn and tomatosoup83
+Have a nice day 
+ヾ(＠⌒▽⌒＠)ﾉ
