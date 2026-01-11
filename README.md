@@ -88,7 +88,7 @@ PLR_Patrick_R_1920x1080_30_2.mp4
 ```
 
 This allows `main.py` / `process.py` to infer the correct FPS and resolution.
-(If you are recording on a Raspberry Pi using our code, then the file naming should have already been automated)
+- (If you are recording on a Raspberry Pi using our code, then the file naming should have already been automated)
 
 ---
 
@@ -101,7 +101,7 @@ Installation instructions are also included in **docs/INSTALL.md**.
 
 ---
 
-Thank you for checking out our repo 
-Developed by haruka, patrickn and tomatosoup83
-Have a nice day 
+- Thank you for checking out our repo 
+- Developed by haruka, patrickn and tomatosoup83
+- Have a nice day 
 ヾ(＠⌒▽⌒＠)ﾉ
