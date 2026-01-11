@@ -95,6 +95,7 @@ This allows `main.py` / `process.py` to infer the correct FPS and resolution.
 ## Third‑party dependency note (PyPupilEXT)
 
 This project uses **PyPupilEXT** (`pypupilext`) for pupil ellipse fitting (PuReST). PyPupilEXT is distributed as platform-specific wheels via its GitHub releases and is licensed under **GPLv3**.
+
 Many thanks to Zandi et al. for developing PupilEXT (and creating a Python port of it) and Santini et al. for his development of the PuReST algorithm.
 
 Installation instructions are also included in **docs/INSTALL.md**.
@@ -102,6 +103,9 @@ Installation instructions are also included in **docs/INSTALL.md**.
 ---
 
 Thank you for checking out our repo!!
+
 Developed by haruka, patrickn and tomatosoup83 ≧◡≦
+
 Have a nice day!
+
 ヾ(＠⌒▽⌒＠)ﾉ
