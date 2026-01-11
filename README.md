@@ -7,6 +7,7 @@ This repository will only focus on **offline processing**:
 - Output: `raw.csv` + `processed.csv` + plots (`.png`)
 
 It also includes an optional **"inbox watcher" workflow** to automatically process new trial videos uploaded from a Raspberry Pi (which records these trial videos using the camera modules) via SSH on the same local network.
+
 If you have a Raspberry Pi and camera setup (with proper stabilization and optionally, light stimuli), you can download the .zip of our Pi Code and run it on the Pi using `bash plr.sh`. 
 
 ---
