@@ -5,9 +5,7 @@ import pandas as pd
 
 
 def plotResults(dataframe, savePath=None, showPlot=True, showMm=False, showConfidence=True, title="Pupil Diameter Over Time"):
-    # clear previous plots
     plt.clf()
-    # plot data based on dataframe
     plt.figure("Showing results for " + str(savePath),figsize=(12, 6))
     plt.subplot(2, 1, 1)
     if showMm:

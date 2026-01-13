@@ -99,7 +99,6 @@ def pupil_detection_in_folder(frames_dir: str, preview_title: str) -> Tuple[List
         confidences.append(float(outline_confidence))
         diameters_px.append(float(pupil_diameter))
 
-        # Preview window (useful for checking detection stability)
         cv2.imshow(preview_title, img_with_pupil)
         cv2.waitKey(1)
 
@@ -182,7 +181,6 @@ def generate_report(video_path: str, show_raw_plot: bool = True) -> str:
 
     stem = os.path.splitext(os.path.basename(video_path))[0]
 
-    # If the filename follows the PLR_* convention, we can trust its fps/res.
     fps_override: Optional[int] = None
     res_override: Optional[str] = None
     m = TRIAL_VIDEO_RE.match(stem)
@@ -268,7 +266,6 @@ def main() -> None:
     input_path = args.input or DEFAULT_VIDEO_PATH
     videos = _find_videos(input_path, recursive=args.recursive)
 
-    # If input is a folder but no videos are found, assume it is already a data folder.
     if os.path.isdir(input_path) and not videos and not args.no_preprocess:
         _run_preprocessing(input_path)
         raise SystemExit(0)

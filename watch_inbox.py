@@ -62,7 +62,6 @@ def _is_candidate_video(p: Path, inbox_root: Path) -> bool:
         return False
     if p.name.endswith(".part"):
         return False
-    # ignore anything that happens to be named like a reserved dir
     if p.name in RESERVED_SUBDIRS:
         return False
     return True
@@ -87,8 +86,6 @@ def _run_process_single_trial(
     """Run process.py in single-trial mode against `trial_dir` (contains raw.csv)."""
     vi_dir = repo_dir / "videoImplement"
     env = os.environ.copy()
-    # Force an interactive backend (your earlier issue). If your matplotlib already
-    # works, this is harmless; if it doesn't, this is often the fix.
     env.setdefault("MPLBACKEND", "MacOSX")
 
     cmd = [
@@ -136,7 +133,6 @@ def _build_session_average_raw(trial_dirs: List[Path], out_average_dir: Path) ->
     out_average_dir.mkdir(parents=True, exist_ok=True)
     raw_out = out_average_dir / "raw.csv"
 
-    # Load all raw.csv
     dfs = []
     max_frames = []
     for td in trial_dirs:
@@ -155,19 +151,14 @@ def _build_session_average_raw(trial_dirs: List[Path], out_average_dir: Path) ->
         max_frames.append(int(df["frame_id"].max()))
         dfs.append(df)
 
-    # Use common frame range [0..min_max]
     min_max_frame = int(min(max_frames))
     frame_ids = np.arange(0, min_max_frame + 1, dtype=int)
 
-    # Use timestamps from the first trial if possible
     df0 = dfs[0].set_index("frame_id").reindex(frame_ids)
     timestamps = df0["timestamp"].to_numpy() if "timestamp" in df0.columns else frame_ids.astype(float)
 
-    # Estimate px_to_mm (pixels per mm) so the session-average raw.csv can include
-    # a non-NaN 'diameter' (pixels) column. This is IMPORTANT because Pass 6
-    # (Savitzky–Golay smoothing) builds a NaN mask using BOTH diameter and
-    # diameter_mm; if diameter is all-NaN, it will wipe diameter_mm too.
-    px_to_mm_est = 30.0  # fallback (matches settings.py anchor for 1920x1080)
+ 
+    px_to_mm_est = 30.0  
     try:
         if 'diameter' in dfs[0].columns and 'diameter_mm' in dfs[0].columns:
             r = pd.to_numeric(dfs[0]['diameter'], errors='coerce') / pd.to_numeric(dfs[0]['diameter_mm'], errors='coerce')
@@ -179,7 +170,6 @@ def _build_session_average_raw(trial_dirs: List[Path], out_average_dir: Path) ->
     except Exception:
         pass
 
-    # Stack diameter_mm
     mm_stack = []
     conf_stack = []
     for df in dfs:
@@ -194,12 +184,10 @@ def _build_session_average_raw(trial_dirs: List[Path], out_average_dir: Path) ->
             conf = conf.mask(bad)
             conf_stack.append(conf.to_numpy())
 
-    mm_stack = np.vstack(mm_stack)  # (n_trials, n_frames)
+    mm_stack = np.vstack(mm_stack) 
     mean_mm = np.nanmean(mm_stack, axis=0)
-    # If all trials are NaN for a frame, nanmean -> NaN
     is_bad = np.isnan(mean_mm)
 
-    # Provide a pixel-domain average too (required by Pass 6 NaN mask).
     mean_px = mean_mm * float(px_to_mm_est)
 
     if conf_stack:
@@ -208,12 +196,11 @@ def _build_session_average_raw(trial_dirs: List[Path], out_average_dir: Path) ->
     else:
         mean_conf = np.full_like(mean_mm, fill_value=np.nan, dtype=float)
 
-    # Create output raw.csv compatible with process.py
     out_df = pd.DataFrame(
         {
             "frame_id": frame_ids,
             "timestamp": timestamps,
-            "diameter": mean_px,  # averaged pixel diameter (needed for Pass 6 NaN mask)
+            "diameter": mean_px,  
             "confidence": mean_conf,
             "is_bad_data": is_bad,
             "diameter_mm": mean_mm,
@@ -262,14 +249,11 @@ def _ingest_one_video(cfg: Config, session: Session, inbox_video: Path) -> None:
     processing_dir = cfg.inbox / "_processing"
     processing_dir.mkdir(parents=True, exist_ok=True)
 
-    # Move into _processing to avoid repeated detection
     processing_video = processing_dir / inbox_video.name
     shutil.move(str(inbox_video), str(processing_video))
 
-    # Raw extraction
     _run_main_raw_only(cfg.python, cfg.repo, processing_video)
 
-    # main.py writes trial folder to videoImplement/data/<stem>
     vi_dir = cfg.repo / "videoImplement"
     data_root = vi_dir / "data"
     data_root.mkdir(parents=True, exist_ok=True)
@@ -277,12 +261,10 @@ def _ingest_one_video(cfg: Config, session: Session, inbox_video: Path) -> None:
     if not produced_trial.exists():
         raise FileNotFoundError(f"Expected trial folder not found: {produced_trial}")
 
-    # Move trial folder into this session's trial/ folder
     dest_trial = _safe_unique_dir(session.trial_root, processing_video.stem)
     shutil.move(str(produced_trial), str(dest_trial))
     session.trials.append(dest_trial)
 
-    # Archive the video
     cfg.archive.mkdir(parents=True, exist_ok=True)
     shutil.move(str(processing_video), str(cfg.archive / processing_video.name))
 
@@ -294,13 +276,11 @@ def _process_session(cfg: Config, session: Session) -> None:
         return
 
     print(f"[session] Processing {len(session.trials)} trial(s)...")
-    # 1) Per-trial processing (NO interactive windows)
     for td in session.trials:
         print(f"[trial] process.py (no windows): {td.name}")
         _run_process_single_trial(cfg.python, cfg.repo, td, show_plots=False)
 
-    # 2) Build ONE average raw.csv
-    # Clear average dir so it contains only one result (as you want)
+
     if session.average_dir.exists():
         for child in session.average_dir.iterdir():
             if child.is_dir():
@@ -311,7 +291,6 @@ def _process_session(cfg: Config, session: Session) -> None:
     _build_session_average_raw(session.trials, session.average_dir)
     print(f"[average] Built averaged raw.csv from {len(session.trials)} trial(s).")
 
-    # 3) Process the average AND show interactive matplotlib plots
     print("[average] process.py (WITH interactive windows). Close plots to finish.")
     _run_process_single_trial(cfg.python, cfg.repo, session.average_dir, show_plots=True)
 
@@ -375,14 +354,12 @@ def main() -> None:
     _print_help()
 
     while True:
-        # 1) Poll for new candidate videos in the inbox root
         for p in sorted(cfg.inbox.iterdir()):
             if not _is_candidate_video(p, cfg.inbox):
                 continue
             if p.name in session.seen_files:
                 continue
 
-            # Avoid racing with uploads: wait until stable
             if not wait_until_stable(p):
                 continue
 
@@ -396,14 +373,11 @@ def main() -> None:
             except Exception as e:
                 print(f"[watch] ERROR: failed ingest for {p.name}: {e}")
 
-            # Process only one per loop iteration to keep UI responsive
             break
 
-        # 2) Non-blocking command input
         try:
             rlist, _, _ = select.select([sys.stdin], [], [], cfg.poll_interval)
         except Exception:
-            # If select isn't available, just sleep
             time.sleep(cfg.poll_interval)
             continue
 

@@ -19,24 +19,21 @@ def linear_interpolation(df: pd.DataFrame, fps=60, max_gap_ms=400): #max 500ms
                 if np.isnan(values[i]):
                     start = i
 
-                    #find gap end
                     while i < n and np.isnan(values[i]):
                         i += 1
                     end = i - 1
 
                     gap_duration_ms = (end - start + 1) * frame_time_ms
 
-                    #interpolate if gap < max_gap_ms
                     if gap_duration_ms <= max_gap_ms:
-                        #find valid neighbours
                         before_idx = start - 1
                         after_idx = end + 1
 
-                        if before_idx < 0:  # Gap at start (no before value)
+                        if before_idx < 0:  
                             if after_idx < n and not np.isnan(values[after_idx]):
                                 after_val = values[after_idx]
                                 for j in range(start, end + 1):
-                                    values[j] = after_val  # Constant fill with after
+                                    values[j] = after_val  
                                 i = end + 1
                                 continue
                             else:    
@@ -63,7 +60,6 @@ def linear_interpolation(df: pd.DataFrame, fps=60, max_gap_ms=400): #max 500ms
                                     values[j] = (1 - t) * before_val + t * after_val
                                     
                                 dprint(f"Frames {start} - {end}: Linear interpolated {gap_duration_ms}")
-                                # advance past this gap
                                 i = end + 1
                                 continue
                             else:
