@@ -7,12 +7,10 @@ def linear_interpolation(df: pd.DataFrame, fps=60, max_gap_ms=400): #max 500ms
     df_interp = df.copy()
     frame_time_ms = 1000 / fps
     
-    # maximum consecutive NaNs (in frames) allowed to be filled
     N_max = int(max_gap_ms / frame_time_ms)
 
-    for col in ['diameter', 'diameter_mm']: # adjust to your column names if needed
+    for col in ['diameter', 'diameter_mm']: 
         if col in df.columns:
-            # Ensure numeric dtype so np.isnan works reliably
             values = pd.to_numeric(df[col], errors='coerce').values.copy()
             n = len(values)
 
@@ -96,7 +94,6 @@ def interpolateData(df: pd.DataFrame, fps: float, max_gap_ms: int = 400) -> pd.D
     return df_interpolated
 
 if __name__ == "__main__":
-    # Simple manual test runner (optional).
     import argparse
 
     parser = argparse.ArgumentParser()

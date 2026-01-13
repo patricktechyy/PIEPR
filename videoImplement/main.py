@@ -22,13 +22,8 @@ DEFAULT_VIDEO_PATH = "../eyeVids/tuna/PLR_Tuna_R_1920x1080_30_4.mp4"
 CONFIDENCE_THRESH = 0.75
 
 _BASE_RES = (1920, 1080)
-_BASE_PX_TO_MM = 30.0  # pixels per mm at 1920x1080, based on your earlier calibration
+_BASE_PX_TO_MM = 30.0  
 
-
-# Expected video stem (no extension):
-#   PLR_<User>_<EyeSide L/R>_<Resolution>_<FPS>_<TrialIndex>
-# Example:
-#   PLR_Patrick_R_1920x1080_30_2
 TRIAL_VIDEO_RE = re.compile(
     r"^PLR_(?P<user>.+)_(?P<eye>[LR])_(?P<res>\d+x\d+)_(?P<fps>\d+)_(?P<trial>\d+)$"
 )
@@ -210,7 +205,6 @@ def generate_report(video_path: str, show_raw_plot: bool = True) -> str:
     conf, diam = pupil_detection_in_folder("frames", preview_title=f"Pupil detection: {stem}")
 
     if total_frames != len(diam):
-        # Keep a consistent length; trim to the shortest list.
         n = min(total_frames, len(diam), len(conf))
         total_frames = n
         diam = diam[:n]

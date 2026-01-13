@@ -22,10 +22,9 @@ from scripts.preProcessing.sixthPass import savgolSmoothing
 from scripts.validation.validity import run_validity_report
 
 
-# ---- Shared configuration ----------------------------------------------------
 
 _BASE_RES = (1920, 1080)
-_BASE_PX_TO_MM = 30.0  # pixels per mm at 1920x1080, based on your calibration
+_BASE_PX_TO_MM = 30.0  
 
 
 def parse_resolution(res_str: str) -> Tuple[int, int]:
@@ -67,7 +66,6 @@ class ProcessingConfig:
     px_to_mm: Optional[float] = None
     confidence_thresh: float = 0.75
 
-    # Pass parameters
     max_gap_ms: int = 400
     savgol_window_ms: int = 150
 
@@ -76,7 +74,6 @@ class ProcessingConfig:
             self.px_to_mm = px_to_mm_from_resolution(self.resolution[0], self.resolution[1])
 
 
-# ---- Trial folder parsing ----------------------------------------------------
 
 TRIAL_RE = re.compile(
     r"^PLR_(?P<user>.+)_(?P<eye>[LR])_(?P<res>\d+x\d+)_(?P<fps>\d+)_(?P<trial>\d+)$"
@@ -107,7 +104,6 @@ def _parse_trial_dirname(dirname: str) -> Optional[TrialMeta]:
     )
 
 
-# ---- Helpers ----------------------------------------------------------------
 
 
 def _ensure_flag_column(df: pd.DataFrame) -> pd.DataFrame:
@@ -207,7 +203,6 @@ def save_pass_quality_reports(
 
     os.makedirs(out_dir, exist_ok=True)
 
-    # Interpolation stats (Pass 4)
     interp_mask = pd.Series(False, index=df_after_4.index)
     if "is_interpolated" in df_after_4.columns:
         interp_mask = df_after_4["is_interpolated"].astype(bool)
@@ -219,24 +214,20 @@ def save_pass_quality_reports(
     max_gap_frames = _max_bool_run(interp_mask)
     max_gap_ms = float(max_gap_frames * (1000.0 / float(config.fps))) if float(config.fps) > 0 else float('nan')
 
-    # Reason breakdown
     reason_counts = {}
     if "flag_reason" in df_final.columns:
         vc = df_final["flag_reason"].astype(str)
         vc = vc[vc != ""]
         reason_counts = vc.value_counts().to_dict()
 
-    # Save stage CSV
     pass_csv = os.path.join(out_dir, "pass_quality.csv")
     pd.DataFrame(stage_rows).to_csv(pass_csv, index=False)
 
-    # Save reasons CSV
     if reason_counts:
         pd.DataFrame(
             [{"reason": k, "count": int(v), "pct": _pct(int(v), len(df_final))} for k, v in reason_counts.items()]
         ).to_csv(os.path.join(out_dir, "flag_reason_counts.csv"), index=False)
 
-    # Save JSON summary
     pass_json = os.path.join(out_dir, "pass_quality.json")
     payload = {
         "trial_label": os.path.basename(os.path.abspath(out_dir)),
@@ -300,7 +291,6 @@ def _load_raw_csv(trial_dir: str) -> pd.DataFrame:
     return _ensure_flag_column(pd.read_csv(raw_csv))
 
 
-# ---- Core pipeline -----------------------------------------------------------
 
 
 def run_passes_1_to_4(
@@ -320,7 +310,6 @@ def run_passes_1_to_4(
     total = len(df)
     stage_rows: List[Dict] = []
 
-    # Treat missing raw values as bad (rare, but keeps stats honest)
     raw_missing = pd.to_numeric(df.get("diameter_mm"), errors="coerce").isna()
     if raw_missing.any():
         df.loc[raw_missing, "is_bad_data"] = True
@@ -339,7 +328,6 @@ def run_passes_1_to_4(
     df = madFilter(df)
     prev_flagged = _stage_collect("Pass 3 (MAD outlier filter)", df, prev_flagged, stage_rows, reason_code="MAD_OUTLIER")
 
-    # Pass 4 interpolation + interpolation bookkeeping
     pre_nan = pd.to_numeric(df["diameter_mm"], errors="coerce").isna()
     df = interpolateData(df, fps=config.fps, max_gap_ms=config.max_gap_ms)
     post_nan = pd.to_numeric(df["diameter_mm"], errors="coerce").isna()
@@ -402,7 +390,6 @@ def process_single_trial(
     graph.plotResults(df_final, savePath=out_plot, showPlot=show_plot, showMm=True)
     dprint(f"Saved plot: {out_plot}")
 
-    # Per-pass flagged summary table (for Results section)
     try:
         save_pass_quality_reports(
             out_dir=trial_dir,
@@ -420,10 +407,7 @@ def process_single_trial(
         interpolated=counts["interpolated"],
     )
 
-    # Statistical validity report (saved to trial folder)
     try:
-        # Assumed onsets based on your fixed recording protocol:
-        # 3s pre-stim, 0.25s blue, 60s rest, 0.25s red, 60s rest.
         assumed_onsets = [3.0, 63.25]
         run_validity_report(
             out_dir=trial_dir,
@@ -536,7 +520,6 @@ def process_group_average(
             interpolated=counts["interpolated"],
         )
 
-        # Statistical validity report (per-trial)
         try:
             assumed_onsets = [3.0, 63.25]
             run_validity_report(
@@ -600,9 +583,7 @@ def process_group_average(
     dprint(f"Saved averaged CSV: {out_csv}")
     dprint(f"Saved averaged plot: {out_plot}")
 
-    # Pass-quality summary for averaged output (Pass 5 + Pass 6 only)
     try:
-        # ensure bookkeeping columns exist
         averaged_after_5 = _ensure_quality_columns(_ensure_flag_column(averaged_after_5))
         averaged_df = _ensure_quality_columns(_ensure_flag_column(averaged_df))
 
@@ -627,7 +608,6 @@ def process_group_average(
     _quality_summary(total, flagged_total, interpolated_total)
 
 
-    # Statistical validity report for averaged output
     try:
         assumed_onsets = [3.0, 63.25]
         run_validity_report(
@@ -691,7 +671,6 @@ def main() -> None:
     data_path = args.data
     show_plot = not args.no_show_plot
 
-    # Single-trial mode
     if os.path.exists(os.path.join(data_path, "raw.csv")):
         folder_name = os.path.basename(os.path.abspath(data_path))
         meta = _parse_trial_dirname(folder_name)
@@ -728,7 +707,6 @@ def main() -> None:
         )
         return
 
-    # Batch mode
     trials = _find_trials_in_parent(data_path)
     if not trials:
         raise ValueError(f"No trial folders found under: {data_path}")

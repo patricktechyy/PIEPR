@@ -8,7 +8,6 @@ DEFAULT_CONFIDENCE_THRESH = 0.75
 def confidenceFilter(df, confidence_thresh: float = DEFAULT_CONFIDENCE_THRESH):
     dprint(f"Pass 1: setting diameters with confidence < {confidence_thresh} to NaN")
 
-    # Ensure the flag column exists
     if 'is_bad_data' not in df.columns:
         df['is_bad_data'] = False
 

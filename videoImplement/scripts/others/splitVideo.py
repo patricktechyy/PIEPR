@@ -1,5 +1,3 @@
-# thanks grok :D
-
 
 import cv2
 import numpy as np
@@ -7,26 +5,22 @@ import numpy as np
 def split_video_left_right(input_video_path, output_left_path, output_right_path, width_threshold=None):
 
     
-    # Open the input video
     cap = cv2.VideoCapture(input_video_path)
     
     if not cap.isOpened():
         print(f"Error: Could not open video {input_video_path}")
         return
     
-    # Get video properties
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     
-    # Determine split point
     if width_threshold is None:
-        split_x = frame_width // 2  # Split exactly in the middle
+        split_x = frame_width // 2 
     else:
         split_x = min(width_threshold, frame_width)
     
-    # New dimensions for output videos
     new_width = split_x
     new_height = frame_height
     
@@ -35,11 +29,10 @@ def split_video_left_right(input_video_path, output_left_path, output_right_path
     print(f"Output dimensions: {new_width}x{new_height}")
     print("converting...")
     
-    # Define codec and create VideoWriters
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')  # Critical fix
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')  
 
     split_x = (frame_width + 1) // 2
-    half_width = split_x  # Use this for both (with padding)
+    half_width = split_x 
 
     out_left = cv2.VideoWriter(output_left_path, fourcc, fps, (half_width, frame_height))
     out_right = cv2.VideoWriter(output_right_path, fourcc, fps, (half_width, frame_height))
@@ -55,7 +48,6 @@ def split_video_left_right(input_video_path, output_left_path, output_right_path
         left = frame[:, :split_x]
         right = frame[:, split_x:]
 
-        # Pad if needed
         if left.shape[1] < half_width:
             left = np.hstack((left, np.zeros((frame_height, half_width - left.shape[1], 3), dtype=np.uint8)))
         if right.shape[1] < half_width:

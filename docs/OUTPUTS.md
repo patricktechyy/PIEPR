@@ -25,11 +25,11 @@ Inside that folder it will contain:
 | `processed_interpolated.csv` | Output after Pass 1–4 (flagging + interpolation) |
 | `processed.csv` | The final result after Pass 6 (Savitzky–Golay smoothing) |
 | `processedPlot.png` | Image of the plot of the final processed result |
-| `pass_quality.csv` | Per-pass flagged counts (% flagged + newly flagged). Useful for your Results table |
+| `pass_quality.csv` | Per-pass flagged counts (% flagged + newly flagged). |
 | `pass_quality.json` | Same as pass_quality.csv, plus interpolation gap stats + reason breakdown |
 | `validity_report.csv` | One-row numeric validity summary for reporting / spreadsheet use |
-| `validity_report.json` | Full validity summary (same content as CSV, but structured) |
-| `validity_overlay.png` | Visual overlay of raw vs interpolated vs smoothed curves |
+| `validity_report.json` | Full validity summary (same content as CSV, however it is more structured) |
+| `validity_overlay.png` | Overlay of raw vs interpolated vs smoothed curves |
 | `validity_residuals.png` | Residuals between interpolated and smoothed curves (smoothing distortion) |
 | `validity_psd.png` | Frequency-domain (PSD) comparison of interpolated vs smoothed signals |
 

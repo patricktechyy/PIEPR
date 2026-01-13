@@ -1,7 +1,0 @@
-stage,flagged_count,flagged_pct,newly_flagged_count,newly_flagged_pct
-Raw (before Pass 1),0,0.0,0,0.0
-Pass 1 (confidence filter),0,0.0,0,0.0
-Pass 2 (biology/blink checks),27,6.733167082294265,27,6.733167082294265
-Pass 3 (MAD outlier filter),57,14.214463840399002,30,7.4812967581047385
-Pass 4 (linear interpolation),57,14.214463840399002,0,0.0
-Pass 6 (Savitzky–Golay smoothing),57,14.214463840399002,0,0.0

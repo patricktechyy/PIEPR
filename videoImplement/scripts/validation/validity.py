@@ -1,32 +1,8 @@
-"""Statistical validity checks for PLR preprocessing.
 
-Goal
-----
-Provide quantitative evidence that the final PLR curve is:
-1) grounded in video-derived frame-wise measurements (raw.csv), and
-2) not overly "artificial" due to interpolation/smoothing.
-
-This module is intentionally conservative and report-friendly:
-- It compares Pass-4 (interpolated) vs Pass-6 (smoothed) to quantify smoothing distortion.
-- It compares raw vs Pass-4 on frames that are *measured* (high confidence & not flagged)
-  to show that Pass 1–4 do not modify retained measurements.
-- It reports data quality (flagged %, interpolated %, max interpolated gap).
-- Optional: simple PLR-event plausibility checks around assumed stimulus times.
-
-Outputs
--------
-Writes into a trial folder:
-- validity_report.json
-- validity_report.csv (one-row table)
-- validity_overlay.png
-- validity_residuals.png
-- validity_psd.png
-
-No plots are shown (save-only) so it is safe in batch/SSH runs.
-"""
 
 from __future__ import annotations
 
+from curses import window
 import json
 import os
 from dataclasses import asdict
@@ -35,7 +11,6 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-# Safe non-interactive backend
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -47,8 +22,6 @@ def _ensure_cols(df: pd.DataFrame) -> pd.DataFrame:
         df["frame_id"] = np.arange(len(df))
     if "is_bad_data" not in df.columns:
         df["is_bad_data"] = False
-    # Pass 4 bookkeeping (present in the main pipeline). Keep it if available;
-    # otherwise default to False so downstream metrics behave sensibly.
     if "is_interpolated" not in df.columns:
         df["is_interpolated"] = False
     return df
@@ -60,7 +33,6 @@ def _align_by_frame(raw: Optional[pd.DataFrame], interp: pd.DataFrame, smooth: p
     smooth = _ensure_cols(smooth)
 
     if raw is None:
-        # align interp & smooth
         m = pd.merge(interp, smooth, on="frame_id", suffixes=("_interp", "_smooth"), how="inner")
         interp2 = m[[c for c in m.columns if c.endswith("_interp") or c == "frame_id"]].copy()
         smooth2 = m[[c for c in m.columns if c.endswith("_smooth") or c == "frame_id"]].copy()
@@ -222,17 +194,14 @@ def _detect_blink_pits(y: np.ndarray, fs: float, min_drop_mm: float = 0.6, max_d
     if len(y) < 10 or not np.isfinite(fs) or fs <= 0:
         return 0
 
-    # robust baseline using rolling median
     win = int(max(5, round(0.5 * fs)))  # 0.5s window
     if win % 2 == 0:
         win += 1
 
-    # rolling median via pandas (simple and robust)
     med = pd.Series(y).rolling(window=win, center=True, min_periods=1).median().to_numpy()
     drop = med - y
 
     pit = drop >= min_drop_mm
-    # count contiguous runs shorter than max_dur_s
     max_len = int(round(max_dur_s * fs))
     count = 0
     cur = 0
@@ -292,7 +261,7 @@ def _event_check(ts: np.ndarray, y: np.ndarray, onset_s: float, pre_s: float = 2
     out["relative_amplitude"] = float(amp / base) if base > 0 else float("nan")
     out["time_to_min_s"] = float(t_min)
 
-    if amp > 0.05:  # avoid nonsense when no response
+    if amp > 0.05: 
         thresh = base - 0.10 * amp
         crossed = np.where(y_post <= thresh)[0]
         if crossed.size > 0:
@@ -326,9 +295,7 @@ def run_validity_report(
 
     fps = float(fps_hint) if fps_hint is not None else _infer_fps_from_ts(ts)
 
-    # Define "measured" frames (used to prove Pass1-4 does not change kept measurements)
     measured_mask = None
-    # Points filled by interpolation (Pass 4), i.e. repaired samples.
     interp_points_mask = interp_aligned["is_interpolated"].astype(bool).to_numpy() if "is_interpolated" in interp_aligned.columns else None
 
     if raw_aligned is not None:
@@ -338,12 +305,9 @@ def run_validity_report(
 
         measured_mask = np.isfinite(y_raw) & (conf >= confidence_thresh) & (~bad)
 
-        # Fallback: if the pipeline didn't provide an explicit is_interpolated mask,
-        # approximate repaired points as those not considered "measured" but present in interp.
         if interp_points_mask is None:
             interp_points_mask = (~measured_mask) & np.isfinite(y_interp)
 
-        # "Pass 1–4 does not modify retained measurements" check
         r_raw_interp_measured = _corr(y_raw[measured_mask], y_interp[measured_mask])
         rmse_raw_interp_measured = _rmse(y_raw[measured_mask], y_interp[measured_mask])
     else:
@@ -353,27 +317,24 @@ def run_validity_report(
         if interp_points_mask is None:
             interp_points_mask = np.zeros_like(y_interp, dtype=bool)
 
-    # Smoothing distortion
     r_interp_smooth = _corr(y_interp, y_smooth)
     rmse_interp_smooth = _rmse(y_interp, y_smooth)
     mae_interp_smooth = _mae(y_interp, y_smooth)
 
-    # Normalized RMSE w.r.t. interp signal range
     y_range = float(np.nanmax(y_interp) - np.nanmin(y_interp)) if np.isfinite(y_interp).any() else float("nan")
     nrmse_interp_smooth = float(rmse_interp_smooth / y_range) if (np.isfinite(rmse_interp_smooth) and np.isfinite(y_range) and y_range > 0) else float("nan")
 
 
-    # Smoothing distortion summary stats
+   
     diff_smooth_minus_interp = y_smooth - y_interp
     dist = _distortion_summary(diff_smooth_minus_interp)
 
-    # Global waveform preservation (very simple sanity indicators)
+  
     global_min_interp_mm = float(np.nanmin(y_interp)) if np.isfinite(y_interp).any() else float("nan")
     global_min_smooth_mm = float(np.nanmin(y_smooth)) if np.isfinite(y_smooth).any() else float("nan")
     delta_global_min_mm = float(global_min_smooth_mm - global_min_interp_mm) if (np.isfinite(global_min_smooth_mm) and np.isfinite(global_min_interp_mm)) else float("nan")
 
-    # --- Data quality metrics (make the conceptual distinction explicit) ---
-    # 1) "Flagged before repair" = frames the pipeline marked as bad (Pass 1–3) *before* interpolation.
+  
     flagged_before_repair = np.zeros(len(y_interp), dtype=bool)
     if "is_bad_data" in interp_aligned.columns:
         flagged_before_repair |= interp_aligned["is_bad_data"].astype(bool).to_numpy()
@@ -381,7 +342,6 @@ def run_validity_report(
 
     flagged_pct_before_repair = float(100.0 * flagged_before_repair.sum() / len(flagged_before_repair)) if len(flagged_before_repair) else float("nan")
 
-    # 2) "Flagged remaining after repair" = frames still invalid after interpolation/smoothing.
     flagged_remaining = np.zeros(len(y_smooth), dtype=bool)
     if "is_bad_data" in smooth_aligned.columns:
         flagged_remaining |= smooth_aligned["is_bad_data"].astype(bool).to_numpy()
@@ -389,15 +349,12 @@ def run_validity_report(
 
     flagged_pct_remaining_final = float(100.0 * flagged_remaining.sum() / len(flagged_remaining)) if len(flagged_remaining) else float("nan")
 
-    # Interpolation (repair) burden
     interpolated_filled_pct = float(100.0 * interp_points_mask.sum() / len(interp_points_mask)) if len(interp_points_mask) else float("nan")
     max_gap_frames, max_gap_s = _max_interp_gap(interp_points_mask, fs=fps)
 
-    # PSD comparisons
     f_i, p_i = _welch_psd(y_interp, fs=fps)
     f_s, p_s = _welch_psd(y_smooth, fs=fps)
 
-    # compute high frequency power ratios (>3 Hz) if possible
     def band_power(f: np.ndarray, p: np.ndarray, fmin: float, fmax: Optional[float] = None) -> float:
         if f.size == 0 or p.size == 0:
             return float("nan")
@@ -417,16 +374,13 @@ def run_validity_report(
     hf_reduction_pct = float(100.0 * (1.0 - hf_ratio)) if np.isfinite(hf_ratio) else float("nan")
     total_ratio = float(total_s / total_i) if (np.isfinite(total_s) and np.isfinite(total_i) and total_i > 0) else float("nan")
 
-    # Blink pit count (heuristic)
     pit_count = _detect_blink_pits(y_interp, fs=fps) if np.isfinite(fps) else 0
 
-    # Optional event plausibility checks (supporting evidence only)
     events: List[Dict[str, float]] = []
     if assumed_onsets_s:
         for onset in assumed_onsets_s:
             events.append(_event_check(ts, y_smooth, onset_s=float(onset)))
 
-    # Optional calibration metrics (only when the folder name looks like a calibration run)
     is_calibration = False
     tl = (trial_label or os.path.basename(os.path.abspath(out_dir))).lower()
     if 'calibration' in tl:
@@ -436,7 +390,6 @@ def run_validity_report(
     if is_calibration and np.isfinite(calibration_truth_mm):
         cal_mask = np.isfinite(y_smooth)
         if interp_points_mask is not None:
-            # exclude filled-in points for calibration stability
             cal_mask &= (~interp_points_mask)
         if measured_mask is not None:
             cal_mask &= measured_mask
@@ -469,13 +422,11 @@ def run_validity_report(
         "duration_s": float(ts[-1] - ts[0]) if len(ts) > 1 else float("nan"),
         "fps_est": float(fps),
         "confidence_thresh": float(confidence_thresh),
-        # NEW: clearer naming
         "flagged_pct_before_repair": float(flagged_pct_before_repair),
         "flagged_pct_remaining_final": float(flagged_pct_remaining_final),
         "interpolated_filled_pct": float(interpolated_filled_pct),
         "max_interpolated_filled_gap_frames": int(max_gap_frames),
         "max_interpolated_filled_gap_s": float(max_gap_s),
-        # Backwards-compatible aliases (deprecated)
         "flagged_pct_final": float(flagged_pct_remaining_final),
         "interpolated_pct": float(interpolated_filled_pct),
         "max_interpolated_gap_frames": int(max_gap_frames),
@@ -504,26 +455,21 @@ def run_validity_report(
         "assumed_event_checks": events,
     }
 
-    # Save JSON
     json_path = os.path.join(out_dir, "validity_report.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
 
-    # Save CSV (flattened)
     flat = report.copy()
-    # store events compactly
     if events:
         for i, ev in enumerate(events, start=1):
             for k, v in ev.items():
                 flat[f"event{i}_{k}"] = v
 
-    # flatten pipeline params (JSON stays structured)
     params = report.get('pipeline_params') or {}
     if isinstance(params, dict):
         for k, v in params.items():
             flat[f"param_{k}"] = v
 
-    # flatten calibration stats (if present)
     cstats = report.get('calibration_stats')
     if isinstance(cstats, dict):
         for k, v in cstats.items():
@@ -531,15 +477,12 @@ def run_validity_report(
 
     flat.pop("assumed_event_checks", None)
     flat.pop("pipeline_params", None)
-    # keep calibration_stats in JSON only; CSV has flattened calib_* columns
-    # but remove the dict itself to avoid stringifying it
     if 'calibration_stats' in flat and isinstance(flat['calibration_stats'], dict):
         flat.pop('calibration_stats', None)
 
     csv_path = os.path.join(out_dir, "validity_report.csv")
     pd.DataFrame([flat]).to_csv(csv_path, index=False)
 
-    # Plots
     _plot_overlay(out_dir, raw_aligned, interp_aligned, smooth_aligned, interp_points_mask)
     _plot_residuals(out_dir, ts, y_interp, y_smooth)
     _plot_psd(out_dir, f_i, p_i, f_s, p_s)
@@ -555,19 +498,16 @@ def _plot_overlay(out_dir: str, raw_df: Optional[pd.DataFrame], interp_df: pd.Da
     else:
         t = np.arange(len(interp_df), dtype=float)
 
-    # Raw points
     if raw_df is not None and "timestamp" in raw_df.columns:
         tr = raw_df["timestamp"].to_numpy(dtype=float)
         yr = raw_df["diameter_mm"].to_numpy(dtype=float)
         plt.scatter(tr, yr, s=8, alpha=0.35, label="Raw (video measurement)")
 
-    # Interpolated + smoothed
     yi = interp_df["diameter_mm"].to_numpy(dtype=float)
     ys = smooth_df["diameter_mm"].to_numpy(dtype=float)
     plt.plot(t, yi, linewidth=1.5, label="Pass 4 (interpolated)")
     plt.plot(t, ys, linewidth=2.0, label="Pass 6 (smoothed)")
 
-    # highlight interpolated points
     if interp_points_mask is not None and interp_points_mask.any() and len(interp_points_mask) == len(t):
         plt.scatter(t[interp_points_mask], yi[interp_points_mask], s=10, alpha=0.5, label="Interpolated points")
 
