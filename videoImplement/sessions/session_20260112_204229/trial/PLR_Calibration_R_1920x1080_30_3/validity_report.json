@@ -1,0 +1,65 @@
+{
+  "trial_label": "PLR_Calibration_R_1920x1080_30_3",
+  "n_frames": 401,
+  "duration_s": 13.333333333333334,
+  "fps_est": 30.0,
+  "confidence_thresh": 0.75,
+  "flagged_pct_final": 0.0,
+  "interpolated_pct": 0.0,
+  "max_interpolated_gap_frames": 0,
+  "max_interpolated_gap_s": 0.0,
+  "r_raw_vs_interp_on_measured": 0.8328541357695812,
+  "rmse_raw_vs_interp_on_measured_mm": 0.02540882133665246,
+  "r_interp_vs_smooth": 0.7780229110119428,
+  "rmse_interp_vs_smooth_mm": 0.02631040972350491,
+  "mae_interp_vs_smooth_mm": 0.02099038118988245,
+  "nrmse_interp_vs_smooth": 0.09866403646314376,
+  "smooth_minus_interp_mean_mm": 7.125044530187834e-06,
+  "smooth_minus_interp_sd_mm": 0.026310408758748734,
+  "smooth_minus_interp_p95_abs_mm": 0.04857142857142982,
+  "smooth_minus_interp_max_abs_mm": 0.08285714285714363,
+  "global_min_interp_mm": 7.9,
+  "global_min_smooth_mm": 7.934285714285712,
+  "delta_global_min_mm": 0.03428571428571203,
+  "psd_highfreq_cut_hz": 4.0,
+  "psd_highfreq_power_reduction_pct": 64.96275537969784,
+  "pipeline_params": {
+    "max_gap_ms": 400.0,
+    "savgol_window_ms": 150.0
+  },
+  "calibration_stats": {
+    "truth_mm": 8.0,
+    "n_samples": 401.0,
+    "mean_mm": 8.037829236432726,
+    "sd_mm": 0.03204205671436761,
+    "bias_mm": 0.037829236432726225,
+    "mae_mm": 0.041254007837547936,
+    "rmse_mm": 0.04957564449979296,
+    "limits95_low_mm": 7.975026805272566,
+    "limits95_high_mm": 8.100631667592888
+  },
+  "psd_total_power_ratio_smooth_over_interp": 0.5864280686547115,
+  "psd_highfreq_power_ratio": 0.3503724462030215,
+  "psd_highfreq_power_ratio_gt3Hz": 0.3503724462030215,
+  "blink_pit_count": 0,
+  "assumed_event_checks": [
+    {
+      "onset_s": 3.0,
+      "baseline_mm": 8.038571428571426,
+      "min_mm": 7.97190476190476,
+      "amplitude_mm": 0.06666666666666643,
+      "relative_amplitude": 0.008293347550500535,
+      "time_to_min_s": 2.0,
+      "latency10_s": 0.0
+    },
+    {
+      "onset_s": 63.25,
+      "baseline_mm": NaN,
+      "min_mm": NaN,
+      "amplitude_mm": NaN,
+      "relative_amplitude": NaN,
+      "time_to_min_s": NaN,
+      "latency10_s": NaN
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "trial_label": "average",
+  "fps": 30.0,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "confidence_thresh": 0.75,
+  "max_gap_ms": 400,
+  "savgol_window_ms": 150,
+  "total_frames": 401,
+  "interpolated_count": 57,
+  "interpolated_pct": 14.214463840399002,
+  "max_interpolated_gap_frames": 3,
+  "max_interpolated_gap_ms": 100.0,
+  "stage_rows": [
+    {
+      "stage": "Raw (before Pass 1)",
+      "flagged_count": 0,
+      "flagged_pct": 0.0,
+      "newly_flagged_count": 0,
+      "newly_flagged_pct": 0.0
+    },
+    {
+      "stage": "Pass 1 (confidence filter)",
+      "flagged_count": 0,
+      "flagged_pct": 0.0,
+      "newly_flagged_count": 0,
+      "newly_flagged_pct": 0.0
+    },
+    {
+      "stage": "Pass 2 (biology/blink checks)",
+      "flagged_count": 27,
+      "flagged_pct": 6.733167082294265,
+      "newly_flagged_count": 27,
+      "newly_flagged_pct": 6.733167082294265
+    },
+    {
+      "stage": "Pass 3 (MAD outlier filter)",
+      "flagged_count": 57,
+      "flagged_pct": 14.214463840399002,
+      "newly_flagged_count": 30,
+      "newly_flagged_pct": 7.4812967581047385
+    },
+    {
+      "stage": "Pass 4 (linear interpolation)",
+      "flagged_count": 57,
+      "flagged_pct": 14.214463840399002,
+      "newly_flagged_count": 0,
+      "newly_flagged_pct": 0.0
+    },
+    {
+      "stage": "Pass 6 (Savitzky\u2013Golay smoothing)",
+      "flagged_count": 57,
+      "flagged_pct": 14.214463840399002,
+      "newly_flagged_count": 0,
+      "newly_flagged_pct": 0.0
+    }
+  ],
+  "reason_counts": {
+    "MAD_OUTLIER": 30,
+    "BIO_BLINK_SPIKE": 27
+  }
+}

@@ -1,3 +1,29 @@
+"""Statistical validity checks for PLR preprocessing.
+
+Goal
+----
+Provide quantitative evidence that the final PLR curve is:
+1) grounded in video-derived frame-wise measurements (raw.csv), and
+2) not overly "artificial" due to interpolation/smoothing.
+
+This module is intentionally conservative and report-friendly:
+- It compares Pass-4 (interpolated) vs Pass-6 (smoothed) to quantify smoothing distortion.
+- It compares raw vs Pass-4 on frames that are *measured* (high confidence & not flagged)
+  to show that Pass 1–4 do not modify retained measurements.
+- It reports data quality (flagged %, interpolated %, max interpolated gap).
+- Optional: simple PLR-event plausibility checks around assumed stimulus times.
+
+Outputs
+-------
+Writes into a trial folder:
+- validity_report.json
+- validity_report.csv (one-row table)
+- validity_overlay.png
+- validity_residuals.png
+- validity_psd.png
+
+No plots are shown (save-only) so it is safe in batch/SSH runs.
+"""
 
 from __future__ import annotations
 

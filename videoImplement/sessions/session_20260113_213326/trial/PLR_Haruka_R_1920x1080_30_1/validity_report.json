@@ -1,0 +1,60 @@
+{
+  "trial_label": "PLR_Haruka_R_1920x1080_30_1",
+  "n_frames": 3511,
+  "duration_s": 117.0,
+  "fps_est": 30.0,
+  "confidence_thresh": 0.75,
+  "flagged_pct_before_repair": 10.623753916263173,
+  "flagged_pct_remaining_final": 0.0,
+  "interpolated_filled_pct": 10.623753916263173,
+  "max_interpolated_filled_gap_frames": 7,
+  "max_interpolated_filled_gap_s": 0.23333333333333334,
+  "flagged_pct_final": 0.0,
+  "interpolated_pct": 10.623753916263173,
+  "max_interpolated_gap_frames": 7,
+  "max_interpolated_gap_s": 0.23333333333333334,
+  "r_raw_vs_interp_on_measured": 0.3002649834295134,
+  "rmse_raw_vs_interp_on_measured_mm": 0.8408593819949394,
+  "r_interp_vs_smooth": 0.9926955715883702,
+  "rmse_interp_vs_smooth_mm": 0.03632443856561788,
+  "mae_interp_vs_smooth_mm": 0.026550270578182864,
+  "nrmse_interp_vs_smooth": 0.01602548760247848,
+  "smooth_minus_interp_mean_mm": -5.226364611507999e-16,
+  "smooth_minus_interp_sd_mm": 0.03632443856561788,
+  "smooth_minus_interp_p95_abs_mm": 0.07714285714285651,
+  "smooth_minus_interp_max_abs_mm": 0.21142857142857086,
+  "global_min_interp_mm": 3.966666666666667,
+  "global_min_smooth_mm": 4.0600000000000005,
+  "delta_global_min_mm": 0.09333333333333371,
+  "psd_highfreq_cut_hz": 4.0,
+  "psd_highfreq_power_reduction_pct": 65.24124648754297,
+  "pipeline_params": {
+    "max_gap_ms": 400.0,
+    "savgol_window_ms": 150.0
+  },
+  "calibration_stats": null,
+  "psd_total_power_ratio_smooth_over_interp": 0.9727377273070573,
+  "psd_highfreq_power_ratio": 0.34758753512457036,
+  "psd_highfreq_power_ratio_gt3Hz": 0.34758753512457036,
+  "blink_pit_count": 0,
+  "assumed_event_checks": [
+    {
+      "onset_s": 3.0,
+      "baseline_mm": 6.054285714285713,
+      "min_mm": 4.0600000000000005,
+      "amplitude_mm": 1.9942857142857129,
+      "relative_amplitude": 0.3294006606890041,
+      "time_to_min_s": 1.5,
+      "latency10_s": 0.16666666666666652
+    },
+    {
+      "onset_s": 63.25,
+      "baseline_mm": 4.744999999999999,
+      "min_mm": 5.424761904761905,
+      "amplitude_mm": -0.6797619047619055,
+      "relative_amplitude": -0.14325856791610234,
+      "time_to_min_s": 2.316666666666663,
+      "latency10_s": NaN
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "trial_label": "average",
+  "n_frames": 401,
+  "duration_s": 13.333333333333334,
+  "fps_est": 30.0,
+  "confidence_thresh": 0.75,
+  "flagged_pct_final": 0.0,
+  "interpolated_pct": 0.0,
+  "max_interpolated_gap_frames": 0,
+  "max_interpolated_gap_s": 0.0,
+  "r_raw_vs_interp_on_measured": 0.832854135769579,
+  "rmse_raw_vs_interp_on_measured_mm": 0.02540882133665246,
+  "r_interp_vs_smooth": 0.7780229110119394,
+  "rmse_interp_vs_smooth_mm": 0.02631040972350501,
+  "mae_interp_vs_smooth_mm": 0.020990381189882435,
+  "nrmse_interp_vs_smooth": 0.09866403646314413,
+  "psd_total_power_ratio_smooth_over_interp": 0.58642806865471,
+  "psd_highfreq_power_ratio_gt3Hz": 0.4057849285191306,
+  "blink_pit_count": 0,
+  "assumed_event_checks": [
+    {
+      "onset_s": 3.0,
+      "baseline_mm": 8.038571428571426,
+      "min_mm": 7.971904761904761,
+      "amplitude_mm": 0.06666666666666554,
+      "relative_amplitude": 0.008293347550500424,
+      "time_to_min_s": 2.0,
+      "latency10_s": 0.0
+    },
+    {
+      "onset_s": 63.25,
+      "baseline_mm": NaN,
+      "min_mm": NaN,
+      "amplitude_mm": NaN,
+      "relative_amplitude": NaN,
+      "time_to_min_s": NaN,
+      "latency10_s": NaN
+    }
+  ]
+}
