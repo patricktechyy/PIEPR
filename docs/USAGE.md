@@ -121,4 +121,4 @@ This will:
 - process all trials
 - build exactly **one** session average in:
   `videoImplement/sessions/session_<timestamp>/average/raw.csv`
-- process the average (and show the interactive plots)
+- process the average (results in the plots)
